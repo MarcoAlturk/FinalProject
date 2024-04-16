@@ -5,22 +5,84 @@ import java.util.Scanner;
 public class Main {
     public static void main(String[] args) {
         System.out.println("Hello and welcome to the event manager!");
-        System.out.println("Please enter what you would like to do : ");
-        System.out.println("1 - Organize a new event.\n" +
-                            "2 - Edit an existing event.\n" +
-                            "3 - Publish an event to telegram.\n" +
-                            "4 - View all the scheduled events.\n" +
-                            "5 - Delete events.\n" +
-                            "6 - Print tickets for guests.\n" +
-                            "7 - Exit");
+
+        EventManager eventManager = new EventManager();
+        GuestManager guestManager = new GuestManager();
 
         Scanner scanner = new Scanner(System.in);
-        try {
-            int input = scanner.nextInt();
+        int input = 0;
 
-        } catch(Exception e) {
-            System.out.println("Please enter a valid number from 1-7.");
-        }
+        do {
+            try {
+                System.out.println("Please enter what you would like to do : ");
+                System.out.println("1 - Organize a new event.\n" +
+                        "2 - Edit an existing event.\n" +
+                        "3 - Publish an event to telegram.\n" +
+                        "4 - View all the scheduled events.\n" +
+                        "5 - Delete events.\n" +
+                        "6 - Print tickets for guests.\n" +
+                        "7 - Exit");
+                input = scanner.nextInt();
+
+                if (input < 1 || input > 7) {
+                    throw new OptionOutOfRangeException("Please enter a number from 1-7.");
+                }
+
+                switch(input){
+                    case 1:
+                        makeNewEvent(eventManager);
+                        break;
+                    case 2:
+                        editEvent();
+                        break;
+                    case 3:
+                        publishEventToTelegram();
+                        break;
+                    case 4:
+                        viewFutureEvents();
+                        break;
+                    case 5:
+                        deleteEvents();
+                        break;
+                    case 6:
+                        printTickets();
+                        break;
+                    case 7:
+                        break;
+                }
+
+            } catch(OptionOutOfRangeException e) {
+                System.out.println(e.getMessage());
+                scanner.nextLine(); // clear the buffer
+            } catch(Exception e) {
+                System.out.println("Please enter a number.");
+                scanner.nextLine(); // clear the buffer
+            }
+        } while(input != 7); // keep looping until they exit
+
+    }
+
+    public static void makeNewEvent(EventManager eventManager) { // make a new event
+
+    }
+
+    public static void editEvent() {
+
+    }
+
+    public static void publishEventToTelegram() {
+
+    }
+
+    public static void viewFutureEvents() {
+
+    }
+
+    public static void deleteEvents() {
+
+    }
+
+    public static void printTickets() {
 
     }
 }
