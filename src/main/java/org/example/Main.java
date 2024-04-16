@@ -63,6 +63,61 @@ public class Main {
     }
 
     public static void makeNewEvent(EventManager eventManager) { // make a new event
+        String name;
+        String description;
+        int maxNumOfGuests;
+        double pricePerGuest;
+
+        Scanner scanner = new Scanner(System.in);
+        System.out.print("Enter the name of the event : ");
+        name = scanner.nextLine();
+        System.out.println("Enter a description of the event : ");
+        description = scanner.nextLine();
+        boolean enteredRight = false;
+        do {
+            try {
+                System.out.print("Enter the total number of guests (if there is no maximum enter 0) : ");
+                maxNumOfGuests = scanner.nextInt();
+                if (maxNumOfGuests < 0) {
+                    throw new NegativeNumberException("Please enter a positive number.");
+                } else {
+                    enteredRight = true;
+                }
+            } catch (NegativeNumberException e) {
+                System.out.println(e.getMessage());
+                scanner.nextLine();
+            } catch (Exception e) {
+                System.out.println("Please enter a number.");
+                scanner.nextLine();
+            }
+
+        } while (!enteredRight); // keep looping until they enter a valid integer
+
+        enteredRight = false;
+        do {
+            try {
+                System.out.print("Enter the price for guests to participate in the event : ");
+                pricePerGuest = scanner.nextDouble();
+                if (pricePerGuest < 0) {
+                    throw new NegativeNumberException("Please enter a positive number.");
+                } else {
+                    enteredRight = true;
+                }
+            } catch (NegativeNumberException e) {
+                System.out.println(e.getMessage());
+                scanner.nextLine();
+            } catch (Exception e) {
+                System.out.println("Please enter a number.");
+                scanner.nextLine();
+            }
+
+        } while (!enteredRight);
+
+        // ask for the directory of guest list, give them the format
+        // get it and separate, store in guestList
+        // ask for date
+        // ask for budget estimate
+
 
     }
 
