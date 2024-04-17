@@ -1,0 +1,10 @@
+Julia,Thompson,29,Vegan
+Marcus,Johnson,34,NoDiet
+Elaine,Wallace,45,Vegetarian
+Henry,Kim,22,NoDiet
+Isabella,Martinez,31,Vegan
+Leo,Fitzgerald,38,Vegetarian
+Nora,Bennett,26,Vegan
+Simon,Patel,41,NoDiet
+Charlotte,Lee,50,Vegetarian
+Oliver,Green,19,NoDiet
