@@ -1,5 +1,9 @@
 package org.example;
 
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Scanner;
 
 public class Main {
@@ -111,6 +115,26 @@ public class Main {
                 scanner.nextLine();
             }
 
+        } while (!enteredRight);
+        scanner.nextLine(); // reset the buffer
+        enteredRight = false;
+        do {
+            try {
+                System.out.println("Please enter the directory of the file containing the guests (the file should be formatted as FIRST NAME,LAST NAME,AGE,DIET(VEGAN, VEGETARIAN, NODIET)) : ");
+                String filePath = scanner.nextLine();
+                if (filePath.endsWith(".txt")) {
+                    String content = new String(Files.readAllBytes(Paths.get(filePath)));
+                    System.out.println("File content:");
+                    System.out.println(content);
+                    enteredRight = true;
+                } else {
+
+                }
+
+            } catch (IOException e) {
+                System.out.println("There was an error reading the file. Please make sure that the directory is correct.");
+
+            }
         } while (!enteredRight);
 
         // ask for the directory of guest list, give them the format
