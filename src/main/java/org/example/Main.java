@@ -8,11 +8,10 @@ import java.util.List;
 import java.util.Scanner;
 
 public class Main {
+    private static EventManager eventManager = new EventManager();
+    private static GuestManager guestManager = new GuestManager();
     public static void main(String[] args) {
         System.out.println("Hello and welcome to the event manager!");
-
-        EventManager eventManager = new EventManager();
-        GuestManager guestManager = new GuestManager();
 
         Scanner scanner = new Scanner(System.in);
         int input = 0;
@@ -35,7 +34,7 @@ public class Main {
 
                 switch(input){
                     case 1:
-                        makeNewEvent(eventManager);
+                        makeNewEvent();
                         break;
                     case 2:
                         editEvent();
@@ -67,7 +66,7 @@ public class Main {
 
     }
 
-    public static void makeNewEvent(EventManager eventManager) { // make a new event
+    public static void makeNewEvent() { // make a new event
         String name;
         String description;
         int maxNumOfGuests;
@@ -139,14 +138,22 @@ public class Main {
                                 enteredRight = false;
                                 throw new NegativeNumberException("Please make sure all of the ages in the file are valid.");
                             }
+
+
                             switch (dietPreference.toLowerCase()) {
                                 case "vegan":
+
+
                                     enteredRight = true;
                                     break;
                                 case "nodiet":
+
+
                                     enteredRight = true;
                                     break;
                                 case "vegetarian":
+
+
                                     enteredRight = true;
                                     break;
                                 default:
