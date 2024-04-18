@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
 import java.util.Scanner;
 
 public class Main {
@@ -78,6 +79,7 @@ public class Main {
         System.out.println("Enter a description of the event : ");
         description = scanner.nextLine();
         boolean enteredRight = false;
+
         do {
             try {
                 System.out.print("Enter the total number of guests (if there is no maximum enter 0) : ");
@@ -120,18 +122,57 @@ public class Main {
         enteredRight = false;
         do {
             try {
-                System.out.println("Please enter the directory of the file containing the guests (the file should be formatted as FIRST NAME,LAST NAME,AGE,DIET(VEGAN, VEGETARIAN, NODIET)) : ");
+                System.out.println("Please enter the directory of the file containing the guests (the file should be formatted as FIRST NAME,LAST NAME,AGE,DIET(VEGAN, VEGETARIAN OR NODIET)) : ");
                 String filePath = scanner.nextLine();
                 if (filePath.endsWith(".txt")) {
-                    String content = new String(Files.readAllBytes(Paths.get(filePath)));
-                    System.out.println("File content:");
-                    System.out.println(content);
-                    enteredRight = true;
-                } else {
+                    List<String> lines = Files.readAllLines(Paths.get(filePath));
 
+                    for (String line : lines) {
+                        String[] data = line.split(",");
+                        if (data.length == 4) { // check if each line has 4 pieces of data
+                            String firstName = data[0].trim();
+                            String lastName = data[1].trim();
+                            int age = Integer.parseInt(data[2].trim());
+                            String dietPreference = data[3].trim();
+
+                            if (age <= 0) {
+                                enteredRight = false;
+                                throw new NegativeNumberException("Please make sure all of the ages in the file are valid.");
+                            }
+                            switch (dietPreference.toLowerCase()) {
+                                case "vegan":
+                                    enteredRight = true;
+                                    break;
+                                case "nodiet":
+                                    enteredRight = true;
+                                    break;
+                                case "vegetarian":
+                                    enteredRight = true;
+                                    break;
+                                default:
+                                    throw new InvalidDietException("Please make sure all diets are correctly formatted (VEGAN, VEGETARIAN OR NODIET)");
+
+                            }
+                            enteredRight = true;
+                        } else {
+                            enteredRight = false;
+                            throw new InvalidFileStructureException("There was an error reading the file contents. Please make sure the file is correctly formatted.");
+                        }
+                    }
+
+                } else {
+                    throw new WrongFileExtensionException("Please enter a txt file.");
                 }
 
-            } catch (IOException e) {
+            } catch (InvalidDietException e) {
+                System.out.println(e.getMessage());
+            } catch (NegativeNumberException e) {
+                System.out.println(e.getMessage());
+            } catch (InvalidFileStructureException e) {
+                System.out.println(e.getMessage());
+            } catch (WrongFileExtensionException e) {
+                System.out.println(e.getMessage());
+            } catch (Exception e) {
                 System.out.println("There was an error reading the file. Please make sure that the directory is correct.");
 
             }

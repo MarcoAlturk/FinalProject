@@ -4,13 +4,12 @@ public class Guest {
     String firstName;
     String lastName;
     int age;
-    Diet diet;
 
-    public Guest(String firstName, String lastName, int age, Diet diet) {
+
+    public Guest(String firstName, String lastName, int age) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.age = age;
-        this.diet = diet;
     }
 
     public String getFirstName() {
@@ -25,9 +24,6 @@ public class Guest {
         return age;
     }
 
-    public Diet getDiet() {
-        return diet;
-    }
 
     public void setFirstName(String firstName) {
         this.firstName = firstName;
@@ -41,7 +37,5 @@ public class Guest {
         this.age = age;
     }
 
-    public void setDiet(Diet diet) {
-        this.diet = diet;
-    }
+
 }
