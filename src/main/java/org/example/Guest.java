@@ -39,5 +39,13 @@ public class Guest {
         this.age = age;
     }
 
-
+    @Override
+    public String toString() {
+        return "Guest{" +
+                "firstName='" + firstName + '\'' +
+                ", lastName='" + lastName + '\'' +
+                ", age=" + age +
+                ", diet=" + diet +
+                '}';
+    }
 }

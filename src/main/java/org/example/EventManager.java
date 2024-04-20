@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class EventManager implements Manageable<Event> {
-    private List<Event> events;
+    public List<Event> events;
 
     public EventManager() {
         this.events = new ArrayList<>();

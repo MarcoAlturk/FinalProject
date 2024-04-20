@@ -21,4 +21,17 @@ public class Event {
         this.date = date;
         this.budget = budget;
     }
+
+    @Override
+    public String toString() {
+        return "Event{" +
+                "name='" + name + '\'' +
+                ", description='" + description + '\'' +
+                ", maxNumOfParticipants=" + maxNumOfParticipants +
+                ", pricePerPerson=" + pricePerPerson +
+                ", guestList=" + guestList +
+                ", date=" + date +
+                ", budget=" + budget +
+                '}';
+    }
 }

@@ -248,9 +248,10 @@ public class Main {
             }
         } while (!enteredRight);
 
+        System.out.println("You successfully created an event!");
+
         Event event = new Event(name, description, maxNumOfGuests, pricePerGuest, guestList, date, budget);
         eventManager.add(event);
-
     }
 
     public static void editEvent() {
@@ -262,7 +263,10 @@ public class Main {
     }
 
     public static void viewFutureEvents() {
-
+        int i = 1;
+        for (Event event : eventManager.events) {
+            System.out.println("1. " + event.name + " - " + event.description + " at " + event.date);
+        }
     }
 
     public static void deleteEvents() {
