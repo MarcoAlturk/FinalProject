@@ -4,12 +4,14 @@ public class Guest {
     String firstName;
     String lastName;
     int age;
+    Diet diet;
 
 
-    public Guest(String firstName, String lastName, int age) {
+    public Guest(String firstName, String lastName, int age, Diet diet) {
         this.firstName = firstName;
         this.lastName = lastName;
         this.age = age;
+        this.diet = diet;
     }
 
     public String getFirstName() {

@@ -6,12 +6,10 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.List;
-import java.util.Scanner;
+import java.util.*;
 
 public class Main {
     private static EventManager eventManager = new EventManager();
-    private static GuestManager guestManager = new GuestManager();
     public static void main(String[] args) {
         System.out.println("Hello and welcome to the event manager!");
 
@@ -72,8 +70,9 @@ public class Main {
         String name;
         String description;
         int maxNumOfGuests = 0;
-        double pricePerGuest;
-        LocalDate date;
+        double pricePerGuest = 0;
+        LocalDate date = LocalDate.now();
+
 
         Scanner scanner = new Scanner(System.in);
         System.out.print("Enter the name of the event : ");
@@ -122,12 +121,15 @@ public class Main {
         } while (!enteredRight);
         scanner.nextLine(); // reset the buffer
         enteredRight = false;
+        int numOfPeopleInFile = 0;
+        ArrayList<Guest> guestList = new ArrayList<Guest>();
         do {
             try {
                 System.out.println("Please enter the directory of the file containing the guests (the file should be formatted as FIRST NAME,LAST NAME,AGE,DIET(VEGAN, VEGETARIAN OR NODIET)) : ");
                 String filePath = scanner.nextLine();
                 if (filePath.endsWith(".txt")) {
                     List<String> lines = Files.readAllLines(Paths.get(filePath));
+                    numOfPeopleInFile = lines.size();
                     if (lines.size() > maxNumOfGuests) {
                         System.out.println("The file contains more guests than allowed.");
                     } else {
@@ -144,18 +146,21 @@ public class Main {
                                     throw new NegativeNumberException("Please make sure all of the ages in the file are valid.");
                                 }
 
-                                Guest guest = new Guest(firstName, lastName, age);
+
                                 switch (dietPreference.toLowerCase()) {
                                     case "vegan":
-                                        guestManager.add(guest, new VeganDiet());
+                                        Guest guest = new Guest(firstName, lastName, age, new VeganDiet());
+                                        guestList.add(guest);
                                         enteredRight = true;
                                         break;
                                     case "nodiet":
-                                        guestManager.add(guest, new GeneralDiet());
+                                        Guest guest2 = new Guest(firstName, lastName, age, new GeneralDiet());
+                                        guestList.add(guest2);
                                         enteredRight = true;
                                         break;
                                     case "vegetarian":
-                                        guestManager.add(guest, new VegetarianDiet());
+                                        Guest guest3 = new Guest(firstName, lastName, age, new VegetarianDiet());
+                                        guestList.add(guest3);
                                         enteredRight = true;
                                         break;
                                     default:
@@ -216,12 +221,35 @@ public class Main {
                 System.out.println(e.getMessage());
             }
         } while (!enteredRight);
+        int budget = 0;
+        enteredRight = false;
+        do {
+            try {
+                System.out.print("Please enter the budget for the event : ");
+                budget = scanner.nextInt();
+                if (budget < 0) throw new NegativeNumberException("Please enter a positive number.");
+                else {
+                    double totalMoney = budget + numOfPeopleInFile * pricePerGuest;
+                    double totalExpense = 0;
+                    for (Guest guest : guestList) {
+                        totalExpense += guest.diet.getPrice();
+                    }
+                    if (totalMoney < totalExpense) {
+                        System.out.println("The total budget + price per guest is not enough to cover the expenses!");
+                        System.out.printf("$%.2f budget vs $%.2f expenses\n", totalMoney, totalExpense);
+                    } else {
+                        enteredRight = true;
+                    }
+                }
+            } catch(NegativeNumberException e) {
+                System.out.println(e.getMessage());
+            }catch (Exception e) {
+                System.out.println(e.getMessage());
+            }
+        } while (!enteredRight);
 
-
-
-
-
-
+        Event event = new Event(name, description, maxNumOfGuests, pricePerGuest, guestList, date, budget);
+        eventManager.add(event);
 
     }
 
