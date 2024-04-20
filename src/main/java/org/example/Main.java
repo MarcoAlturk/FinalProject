@@ -4,6 +4,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Scanner;
 
@@ -69,8 +71,9 @@ public class Main {
     public static void makeNewEvent() { // make a new event
         String name;
         String description;
-        int maxNumOfGuests;
+        int maxNumOfGuests = 0;
         double pricePerGuest;
+        LocalDate date;
 
         Scanner scanner = new Scanner(System.in);
         System.out.print("Enter the name of the event : ");
@@ -125,47 +128,48 @@ public class Main {
                 String filePath = scanner.nextLine();
                 if (filePath.endsWith(".txt")) {
                     List<String> lines = Files.readAllLines(Paths.get(filePath));
+                    if (lines.size() > maxNumOfGuests) {
+                        System.out.println("The file contains more guests than allowed.");
+                    } else {
+                        for (String line : lines) {
+                            String[] data = line.split(",");
+                            if (data.length == 4) { // check if each line has 4 pieces of data
+                                String firstName = data[0].trim();
+                                String lastName = data[1].trim();
+                                int age = Integer.parseInt(data[2].trim());
+                                String dietPreference = data[3].trim();
 
-                    for (String line : lines) {
-                        String[] data = line.split(",");
-                        if (data.length == 4) { // check if each line has 4 pieces of data
-                            String firstName = data[0].trim();
-                            String lastName = data[1].trim();
-                            int age = Integer.parseInt(data[2].trim());
-                            String dietPreference = data[3].trim();
+                                if (age <= 0) {
+                                    enteredRight = false;
+                                    throw new NegativeNumberException("Please make sure all of the ages in the file are valid.");
+                                }
 
-                            if (age <= 0) {
+                                Guest guest = new Guest(firstName, lastName, age);
+                                switch (dietPreference.toLowerCase()) {
+                                    case "vegan":
+                                        guestManager.add(guest, new VeganDiet());
+                                        enteredRight = true;
+                                        break;
+                                    case "nodiet":
+                                        guestManager.add(guest, new GeneralDiet());
+                                        enteredRight = true;
+                                        break;
+                                    case "vegetarian":
+                                        guestManager.add(guest, new VegetarianDiet());
+                                        enteredRight = true;
+                                        break;
+                                    default:
+                                        throw new InvalidDietException("Please make sure all diets are correctly formatted (VEGAN, VEGETARIAN OR NODIET)");
+
+                                }
+                                enteredRight = true;
+                            } else {
                                 enteredRight = false;
-                                throw new NegativeNumberException("Please make sure all of the ages in the file are valid.");
+                                throw new InvalidFileStructureException("There was an error reading the file contents. Please make sure the file is correctly formatted.");
                             }
-
-
-                            switch (dietPreference.toLowerCase()) {
-                                case "vegan":
-
-
-                                    enteredRight = true;
-                                    break;
-                                case "nodiet":
-
-
-                                    enteredRight = true;
-                                    break;
-                                case "vegetarian":
-
-
-                                    enteredRight = true;
-                                    break;
-                                default:
-                                    throw new InvalidDietException("Please make sure all diets are correctly formatted (VEGAN, VEGETARIAN OR NODIET)");
-
-                            }
-                            enteredRight = true;
-                        } else {
-                            enteredRight = false;
-                            throw new InvalidFileStructureException("There was an error reading the file contents. Please make sure the file is correctly formatted.");
                         }
                     }
+
 
                 } else {
                     throw new WrongFileExtensionException("Please enter a txt file.");
@@ -185,10 +189,38 @@ public class Main {
             }
         } while (!enteredRight);
 
-        // ask for the directory of guest list, give them the format
-        // get it and separate, store in guestList
-        // ask for date
-        // ask for budget estimate
+        LocalDate today = LocalDate.now();
+
+        enteredRight = false;
+        do {
+            try {
+                System.out.println("When is the event (dd/mm/yyyy) : ");
+                String input = scanner.nextLine();
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("d/M/yyyy");
+                date = LocalDate.parse(input, formatter);
+                if (DateValidater.isValidDate(date.getYear(), date.getMonthValue(), date.getDayOfMonth())) {
+
+                    if (date.isBefore(LocalDate.now())) {
+                        System.out.println("Please don't enter a date before now.");
+                    } else {
+                        date = LocalDate.parse(input, formatter);
+                        enteredRight = true;
+                    }
+                } else {
+                    throw new InvalidDateException("Please enter a valid date.");
+                }
+            } catch (InvalidDateException e) {
+                System.out.println(e.getMessage());
+            }
+            catch(Exception e) {
+                System.out.println(e.getMessage());
+            }
+        } while (!enteredRight);
+
+
+
+
+
 
 
     }

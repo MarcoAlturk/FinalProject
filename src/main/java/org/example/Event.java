@@ -1,5 +1,6 @@
 package org.example;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 
 public class Event {
@@ -8,10 +9,10 @@ public class Event {
     int maxNumOfParticipants;
     double pricePerPerson;
     ArrayList<Guest> guestList = new ArrayList<Guest>();
-    Date date;
+    LocalDate date;
     double budget;
 
-    public Event(String name, String description, int maxNumOfParticipants, double pricePerPerson, ArrayList<Guest> guestList, Date date, double budget) {
+    public Event(String name, String description, int maxNumOfParticipants, double pricePerPerson, ArrayList<Guest> guestList, LocalDate date, double budget) {
         this.name = name;
         this.description = description;
         this.maxNumOfParticipants = maxNumOfParticipants;
