@@ -7,9 +7,17 @@ import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
-
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.telegram.telegrambots.bots.TelegramLongPollingBot;
+import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
+import org.telegram.telegrambots.meta.api.objects.Update;
+import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
+import org.telegram.telegrambots.meta.TelegramBotsApi;
+import org.telegram.telegrambots.updatesreceivers.DefaultBotSession;
 public class Main {
     private static EventManager eventManager = new EventManager();
+    private static final Logger logger = LoggerFactory.getLogger(SendTelegramMessage.class);
     public static void main(String[] args) {
         System.out.println("Hello and welcome to the event manager!");
 
@@ -18,7 +26,7 @@ public class Main {
 
         do {
             try {
-                System.out.println("Please enter what you would like to do : ");
+
                 System.out.println("1 - Organize a new event.\n" +
                         "2 - Edit an existing event.\n" +
                         "3 - Publish an event to telegram.\n" +
@@ -26,6 +34,7 @@ public class Main {
                         "5 - Delete events.\n" +
                         "6 - Print tickets for guests.\n" +
                         "7 - Exit");
+                System.out.print("Please enter what you would like to do : ");
                 input = scanner.nextInt();
 
                 if (input < 1 || input > 7) {
@@ -259,6 +268,48 @@ public class Main {
     }
 
     public static void publishEventToTelegram() {
+        if (eventManager.events.size() == 0) {
+            System.out.println("You don't have any events!");
+        } else {
+
+            boolean enteredRight = false;
+            do {
+                try {
+
+                    Scanner scanner = new Scanner(System.in);
+                    System.out.println("Which event would you like to publicize : ");
+                    int i = 0;
+                    for (i = 0; i < eventManager.events.size(); i++) {
+                        System.out.println(i+1  + "- " + eventManager.events.get(i).name);
+                    }
+                    int num = scanner.nextInt();
+                    if (num <= 0 || num >= i+1) {
+                        System.out.println("The number you entered is out of range.");
+                        enteredRight = false;
+                    } else {
+                        scanner.nextLine();
+                        enteredRight = true;
+                        System.out.println("Enter the Chat ID:");
+                        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
+                        String formattedDate = eventManager.events.get(i-1).date.format(formatter);
+                        String chatId = scanner.nextLine();  // Read chat ID from the console
+                        String messageText = String.format("Hello everyone! This is a reminder that the event %s will take place at %s, and that the price per guest is $%.2f", eventManager.events.get(i-1).name, eventManager.events.get(i-1).date, eventManager.events.get(i-1).budget);
+
+                        TelegramBotsApi botsApi = new TelegramBotsApi(DefaultBotSession.class);
+                        SendTelegramMessage bot = new SendTelegramMessage();
+                        botsApi.registerBot(bot);
+                        bot.sendMessage(chatId, messageText);
+                    }
+
+
+                } catch (TelegramApiException exception) {
+                    System.out.println(exception.getMessage());
+                } catch (Exception e) {
+                    System.out.println(e.getMessage());
+                }
+            } while (!enteredRight);
+
+        }
 
     }
 
