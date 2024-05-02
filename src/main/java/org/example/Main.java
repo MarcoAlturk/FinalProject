@@ -1,8 +1,7 @@
 package org.example;
 
-import java.io.IOException;
+import java.io.*;
 import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
@@ -32,7 +31,7 @@ public class Main {
                         "3 - Publish an event to telegram.\n" +
                         "4 - View all the scheduled events.\n" +
                         "5 - Delete events.\n" +
-                        "6 - Print tickets for guests.\n" +
+                        "6 - Make tickets for guests.\n" +
                         "7 - Exit");
                 System.out.print("Please enter what you would like to do : ");
                 input = scanner.nextInt();
@@ -58,7 +57,7 @@ public class Main {
                         deleteEvents();
                         break;
                     case 6:
-                        printTickets();
+                        makeTickets();
                         break;
                     case 7:
                         break;
@@ -68,6 +67,7 @@ public class Main {
                 System.out.println(e.getMessage());
                 scanner.nextLine(); // clear the buffer
             } catch(Exception e) {
+                System.out.println("exception : " + e.getMessage());
                 System.out.println("Please enter a number.");
                 scanner.nextLine(); // clear the buffer
             }
@@ -293,7 +293,7 @@ public class Main {
                         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy");
                         String formattedDate = eventManager.events.get(i-1).date.format(formatter);
                         String chatId = scanner.nextLine();  // Read chat ID from the console
-                        String messageText = String.format("Hello everyone! This is a reminder that the event %s will take place at %s, and that the price per guest is $%.2f", eventManager.events.get(i-1).name, eventManager.events.get(i-1).date, eventManager.events.get(i-1).budget);
+                        String messageText = String.format("Hello everyone! This is a reminder that the event %s will take place at %s, and that the price per guest is $%.2f", eventManager.events.get(i-1).name, eventManager.events.get(i-1).date, eventManager.events.get(i-1).pricePerPerson);
 
                         TelegramBotsApi botsApi = new TelegramBotsApi(DefaultBotSession.class);
                         SendTelegramMessage bot = new SendTelegramMessage();
@@ -324,7 +324,79 @@ public class Main {
 
     }
 
-    public static void printTickets() {
+    public static void makeTickets() {
+        Scanner scanner = new Scanner(System.in);
+        boolean enteredRight = false;
+        String sourcePath = "C:\\Users\\18180017\\Desktop\\CEGEP\\Sem2\\Programming\\FinalProject\\TicketTemplate.txt";
+        System.out.println("Which event would you like to publicize : ");
+        Event event = eventManager.events.get(0);
+        do {
+            int i = 0;
+            for (i = 0; i < eventManager.events.size(); i++) {
+                System.out.println(i+1  + "- " + eventManager.events.get(i).name);
+            }
+
+            int num = scanner.nextInt();
+            if (num <= 0 || num >= i+1) {
+                System.out.println("The number you entered is out of range.");
+                enteredRight = false;
+            } else {
+                event = eventManager.events.get(num-1);
+                enteredRight = true;
+            }
+        } while(!enteredRight);
+        enteredRight = false;
+
+
+        if (eventManager.events.size() == 0) {
+            System.out.println("You don't have any events.");
+            enteredRight = false;
+        } else {
+            do {
+                scanner.nextLine();
+                System.out.println("Enter the folder path to store the tickets: ");
+                String directoryPath = scanner.nextLine();
+
+                File directory = new File(directoryPath);
+                if (directory.exists() && directory.isDirectory()) {
+                    enteredRight = true;
+                    for (Guest guest : event.guestList) {
+                        try (
+                                BufferedWriter writer = new BufferedWriter(new FileWriter(directoryPath+"/"+guest.firstName+guest.lastName+".txt"))) {
+
+
+                            String rectangle =
+                                    "+--------------------------------------------------+\n" +
+                                            "\t\t" + guest.firstName + "\n" +
+                                            "\t\t" + guest.lastName + "\n" +
+                                            "\t\t" + event.name + "\n" +
+                                            "\t\t" + event.date + "\n"+
+                                    "+--------------------------------------------------+";
+
+
+
+
+
+                            writer.write(rectangle);
+                            writer.newLine();
+
+
+                        } catch (IOException e) {
+                            System.out.println("An error occurred: " + e.getMessage());
+                        }
+                    }
+
+
+                } else {
+                    System.out.println("Directory does not exist or is not a directory.");
+                    enteredRight = false;
+                }
+
+            } while (!enteredRight);
+        }
+
+        System.out.println("The tickets have been succesfully made!");
+
 
     }
 }
