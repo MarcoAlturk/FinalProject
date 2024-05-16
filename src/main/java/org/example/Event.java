@@ -12,6 +12,9 @@ public class Event {
     LocalDate date;
     double budget;
 
+    public Event() {
+    }
+
     public Event(String name, String description, int maxNumOfParticipants, double pricePerPerson, ArrayList<Guest> guestList, LocalDate date, double budget) {
         this.name = name;
         this.description = description;
@@ -33,5 +36,21 @@ public class Event {
                 ", date=" + date +
                 ", budget=" + budget +
                 '}';
+    }
+
+    public void displayEventDetails() {
+        System.out.println("Name : " + name);
+        System.out.println("Description : " + description);
+        System.out.println(maxNumOfParticipants + " participants maximum.");
+        System.out.printf("%.2f$ per person.\n", pricePerPerson);
+        SortingAlgorithms.quickSort(guestList, 0, guestList.size()-1);
+        System.out.println("Guest List Sorted By Age : ");
+        for (int i = 0; i < guestList.size(); i++) {
+            System.out.println(i + 1 + " - " + guestList.get(i).firstName + " " + guestList.get(i).lastName + " " + guestList.get(i).age);
+        }
+        System.out.println("Date : " + date);
+        System.out.println("Budget : " + budget + "$");
+        System.out.println("--------------------------------------------");
+
     }
 }

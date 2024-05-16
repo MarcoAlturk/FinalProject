@@ -8,6 +8,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 import jdk.jshell.spi.ExecutionControlProvider;
+import org.checkerframework.checker.units.qual.C;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
@@ -16,6 +17,12 @@ import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
 import org.telegram.telegrambots.meta.TelegramBotsApi;
 import org.telegram.telegrambots.updatesreceivers.DefaultBotSession;
+
+//to do :
+// implement sorting algorithm for the guestlist, and for events
+// implement searching algorithm for guest list and for events
+// documentation
+// project report
 public class Main {
     private static EventManager eventManager = new EventManager();
     private static final Logger logger = LoggerFactory.getLogger(SendTelegramMessage.class);
@@ -83,14 +90,31 @@ public class Main {
         int maxNumOfGuests = 0;
         double pricePerGuest = 0;
         LocalDate date = LocalDate.now();
-
-
         Scanner scanner = new Scanner(System.in);
+        boolean enteredRight = false;
+        Event event;
+        do {
+            System.out.println("Is the event a conference? (Y/N) : ");
+            String answer = scanner.nextLine();
+            if (answer.equals("Y")) {
+                enteredRight = true;
+                event = new Conference();
+            } else if (answer.equals("N")) {
+                enteredRight = true;
+                event = new Event();
+            } else {
+                enteredRight = false;
+            }
+        } while (!enteredRight);
+
+
+
+
         System.out.print("Enter the name of the event : ");
         name = scanner.nextLine();
         System.out.println("Enter a description of the event : ");
         description = scanner.nextLine();
-        boolean enteredRight = false;
+
 
         do {
             try {
@@ -110,13 +134,15 @@ public class Main {
             }
 
         } while (!enteredRight); // keep looping until they enter a valid integer
-
+        enteredRight = false;
         do {
             try {
                 System.out.print("Enter the price for guests to participate in the event : ");
                 pricePerGuest = scanner.nextDouble();
                 if (pricePerGuest < 0) {
+                    enteredRight = false;
                     throw new NegativeNumberException("Please enter a positive number.");
+
                 } else {
                     enteredRight = true;
                 }
@@ -260,7 +286,7 @@ public class Main {
 
         System.out.println("You successfully created an event!");
 
-        Event event = new Event(name, description, maxNumOfGuests, pricePerGuest, guestList, date, budget);
+        event = new Event(name, description, maxNumOfGuests, pricePerGuest, guestList, date, budget);
         eventManager.add(event);
     }
 
@@ -330,12 +356,14 @@ public class Main {
                         System.out.print("Enter the new name : ");
                         String newName = scanner.nextLine();
                         eventManager.events.get(chosenEvent-1).name = newName;
+                        System.out.println("New name set successfully.");
                         break;
                     case 2:
                         validInput = true;
                         System.out.print("Enter the new description : ");
                         String newDescription = scanner.nextLine();
                         eventManager.events.get(chosenEvent-1).description = newDescription;
+                        System.out.println("New description set successfully.");
                         break;
                     case 3:
                         validInput = true;
@@ -350,6 +378,7 @@ public class Main {
                                 } else {
                                     enteredRight = true;
                                     eventManager.events.get(chosenEvent-1).pricePerPerson = pricePerGuest;
+                                    System.out.println("New price per person set successfully.");
                                 }
                             } catch (NegativeNumberException e) {
                                 System.out.println(e.getMessage());
@@ -373,9 +402,10 @@ public class Main {
                                 if (maxNumOfGuests < 0) {
                                     throw new NegativeNumberException("Please enter a positive number.");
                                 } else if (maxNumOfGuests < eventManager.events.get(chosenEvent-1).guestList.size()) {
-                                    System.out.println("The guest list exceeds the total numbr of participants.");
+                                    System.out.println("The guest list exceeds the total number of participants.");
                                 } else {
                                     eventManager.events.get(chosenEvent-1).maxNumOfParticipants = maxNumOfGuests;
+                                    System.out.println("New maximum number of guests set successfully.");
                                     enteredRight = true;
                                 }
                             } catch (NegativeNumberException e) {
@@ -463,6 +493,7 @@ public class Main {
                             }
                         } while (!enteredRight);
                         eventManager.events.get(chosenEvent-1).guestList = guestList;
+                        System.out.println("New guest list set succesfully.");
                         break;
                     case 6:
                         validInput = true;
@@ -483,6 +514,7 @@ public class Main {
                                         date = LocalDate.parse(input, formatter);
                                         eventManager.events.get(chosenEvent-1).date = date;
                                         enteredRight = true;
+                                        System.out.println("New date set successfully.");
                                     }
                                 } else {
                                     throw new InvalidDateException("Please enter a valid date.");
@@ -498,17 +530,17 @@ public class Main {
                     case 7:
                         boolean enteredRight2 = false;
                         int budget = 0;
-
-                        while (!enteredRight2) {
+                        Scanner scanner2 = new Scanner(System.in);
+                        do {
                             try {
                                 System.out.print("Please enter the budget for the event: ");
-                                if (!scanner.hasNextInt()) {
+                                if (!scanner2.hasNextInt()) {
                                     System.out.println("Invalid input, please enter a valid number.");
-                                    scanner.next(); // Clear the invalid input
+                                    scanner2.next(); // Clear the invalid input
                                     continue;
                                 }
-                                budget = scanner.nextInt();
-                                scanner.nextLine(); // Clear the newline character
+                                budget = scanner2.nextInt();
+                                scanner2.nextLine(); // Clear the newline character
                                 if (budget < 0) {
                                     throw new NegativeNumberException("Please enter a positive number.");
                                 } else {
@@ -530,17 +562,20 @@ public class Main {
                                         eventManager.events.get(chosenEvent - 1).budget = budget;
                                         enteredRight2 = true; // Set flag to true to exit the loop
                                         System.out.println("Budget set successfully.");
+
                                     }
                                 }
                             } catch (NegativeNumberException e) {
                                 System.out.println(e.getMessage());
                             } catch (Exception e) {
                                 System.out.println("Invalid input, please try again.");
-                                if (scanner.hasNext()) {
-                                    scanner.next(); // Clear the invalid input
+                                if (scanner2.hasNext()) {
+                                    scanner2.next(); // Clear the invalid input
                                 }
                             }
-                        }
+                        } while (!enteredRight2);
+                        validInput = true;
+                        break;
                     default:
                         validInput = false;
 
@@ -599,14 +634,39 @@ public class Main {
     }
 
     public static void viewFutureEvents() {
-        int i = 1;
         for (Event event : eventManager.events) {
-            System.out.println("1. " + event.name + " - " + event.description + " at " + event.date);
+            event.displayEventDetails();
         }
     }
 
     public static void deleteEvents() {
+        if (eventManager.events.size() == 0) {
+            System.out.println("You don't have any events scheduled.");
+        } else {
+            Scanner scanner = new Scanner(System.in);
+            System.out.println("Current events : ");
+            for (int i = 0; i < eventManager.events.size(); i++) {
+                System.out.println(i + 1 + " - " + eventManager.events.get(i).name);
+            }
+            boolean enteredRight = false;
+            do {
+                System.out.print("Which event would you like to delete : ");
+                if (!scanner.hasNextInt()) {
+                    System.out.println("Please enter a number.");
+                } else {
+                    int deleteEvent = scanner.nextInt();
+                    if (deleteEvent <= 0 || deleteEvent > eventManager.events.size()) {
+                        System.out.println("Please enter a number within the range.");
+                    } else {
+                        enteredRight = true;
+                        eventManager.events.remove(deleteEvent-1);
+                        System.out.println("Event removed successfully.");
+                    }
+                }
+            } while (!enteredRight);
 
+
+        }
     }
 
     public static void makeTickets() {

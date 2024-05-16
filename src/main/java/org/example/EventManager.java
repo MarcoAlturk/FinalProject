@@ -30,5 +30,9 @@ public class EventManager implements Manageable<Event> {
         }
         return false;
     }
+
+    public static void viewEvents() {
+        
+    }
 }
 
