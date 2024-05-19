@@ -23,9 +23,20 @@ import org.telegram.telegrambots.updatesreceivers.DefaultBotSession;
 // implement searching algorithm for guest list and for events
 // documentation
 // project report
+
+/**
+ * Marco Alturk
+ * Main Class
+ */
 public class Main {
     private static EventManager eventManager = new EventManager();
     private static final Logger logger = LoggerFactory.getLogger(SendTelegramMessage.class);
+
+    /**
+     * Main method
+     * It asks for the user input and then calls the appropriate method
+     * @param args
+     */
     public static void main(String[] args) {
         System.out.println("Hello and welcome to the event manager!");
 
@@ -41,12 +52,14 @@ public class Main {
                         "4 - View all the scheduled events.\n" +
                         "5 - Delete events.\n" +
                         "6 - Make tickets for guests.\n" +
-                        "7 - Exit");
+                        "7 - Search for an event\n" +
+                        "8 - Search for a guest\n" +
+                        "9 - Exit");
                 System.out.print("Please enter what you would like to do : ");
                 input = scanner.nextInt();
 
-                if (input < 1 || input > 7) {
-                    throw new OptionOutOfRangeException("Please enter a number from 1-7.");
+                if (input < 1 || input > 9) {
+                    throw new OptionOutOfRangeException("Please enter a number from 1-9.");
                 }
 
                 switch(input){
@@ -69,7 +82,14 @@ public class Main {
                         makeTickets();
                         break;
                     case 7:
+                        searchForEvent();
                         break;
+                    case 8:
+                        searchForGuest();
+                        break;
+                    case 9:
+                        return;
+
                 }
 
             } catch(OptionOutOfRangeException e) {
@@ -80,10 +100,13 @@ public class Main {
                 System.out.println("Please enter a number.");
                 scanner.nextLine(); // clear the buffer
             }
-        } while(input != 7); // keep looping until they exit
+        } while(input != 9); // keep looping until they exit
 
     }
 
+    /**
+     * It makes a new event, getting all the necessary info in order to create a new Event Object and add it to the Eventmanager events arraylist
+     */
     public static void makeNewEvent() { // make a new event
         String name;
         String description;
@@ -290,6 +313,10 @@ public class Main {
         eventManager.add(event);
     }
 
+    /**
+     * It edits any already existing event
+     * It accesses the event from the EventManager events Arraylist
+     */
     public static void editEvent() {
         Scanner scanner = new Scanner(System.in);
         if (eventManager.events.size() == 0) {
@@ -586,7 +613,9 @@ public class Main {
     }
 
 
-
+    /**
+     * It accesses telegram's api in order to send a message to a group chat
+     */
     public static void publishEventToTelegram() {
         if (eventManager.events.size() == 0) {
             System.out.println("You don't have any events!");
@@ -633,12 +662,16 @@ public class Main {
 
     }
 
+    /**
+     * This just calls the EventManager.viewEvents(), which in turn loops through the events and prints them out
+     */
     public static void viewFutureEvents() {
-        for (Event event : eventManager.events) {
-            event.displayEventDetails();
-        }
+        eventManager.viewEvents();
     }
 
+    /**
+     * Deletes events, removes them from the eventManager events arraylist
+     */
     public static void deleteEvents() {
         if (eventManager.events.size() == 0) {
             System.out.println("You don't have any events scheduled.");
@@ -669,6 +702,12 @@ public class Main {
         }
     }
 
+
+    /**
+     * Makes tickets for the event
+     * The tickets include the first name, last name, date and event name, which they can then print and bring to the event
+     * The tickets are stored into any folder that the user would like
+     */
     public static void makeTickets() {
         Scanner scanner = new Scanner(System.in);
         boolean enteredRight = false;
@@ -744,6 +783,57 @@ public class Main {
     }
 
 
+    /**
+     * Searches for the name of any event that the user enters. Uses Linear search
+     */
+    public static void searchForEvent() {
+        if (eventManager.events.size() == 0) {
+            System.out.println("You don't have any events.");
+
+        } else {
+            Scanner scanner = new Scanner(System.in);
+            System.out.print("What is the name of the event you want to search for : ");
+            String name = scanner.nextLine();
+            Event event = SearchingAlgorithms.linearSearch(eventManager.events,name);
+            if (event != null) {
+                System.out.println("Event found!");
+                event.displayEventDetails();
+            } else {
+                System.out.println("There are no events with that name.");
+            }
+        }
+
+    }
+
+    /**
+     * Searches for the name of any guest that the user enters
+     * Uses hash based search
+     */
+    public static void searchForGuest() {
+        if (eventManager.events.size() == 0) {
+            System.out.println("You don't have any events.");
+        } else {
+            Scanner scanner = new Scanner(System.in);
+            System.out.println("What is the first name of the guest : ");
+            String firstName = scanner.nextLine();
+            System.out.println("What is the last name of the guest : ");
+            String lastName = scanner.nextLine();
+            ArrayList<Guest> guests = new ArrayList<>();
+            for (int i = 0; i < eventManager.events.size(); i++) {
+                for (int j = 0; j < eventManager.events.get(i).guestList.size(); j++) {
+                    guests.add(eventManager.events.get(i).guestList.get(j));
+                }
+            }
+            Guest guest = SearchingAlgorithms.hashBasedSearch(guests, firstName + " " + lastName);
+            if (guest != null) {
+                System.out.println("Guest found!");
+                System.out.println(guest);
+            } else {
+                System.out.println("No guest with that name is found.");
+            }
+        }
+
+    }
 
 
 }

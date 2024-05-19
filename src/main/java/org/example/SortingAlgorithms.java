@@ -4,7 +4,16 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
 
+/**
+ * Class to hold the storing algorithms
+ */
 public class SortingAlgorithms {
+    /**
+     * Quicksort Algorithm
+     * @param list the guest arraylist
+     * @param left the left bound
+     * @param right the right bound
+     */
     public static void quickSort(ArrayList<Guest> list, int left, int right) {
         if (left < right) {
             int pivotIndex = partition(list, left, right);
@@ -13,6 +22,13 @@ public class SortingAlgorithms {
         }
     }
 
+    /**
+     * Quicksort method partition, in order to order the two lists
+     * @param list the list
+     * @param left the left bound
+     * @param right the right bound
+     * @return
+     */
     private static int partition(ArrayList<Guest> list, int left, int right) {
         Guest pivot = list.get(right);
         int i = left - 1;
@@ -26,38 +42,60 @@ public class SortingAlgorithms {
         return i + 1;
     }
 
-    public static void mergeSort(int[] array) {
-        if (array.length <= 1) {
+    /**
+     * Merge sort method
+     * @param list the event arraylist to sort
+     */
+    public static void mergeSort(ArrayList<Event> list) {
+        if (list.size() <= 1) {
             return;
         }
 
-        int midpoint = array.length / 2;
-        int[] leftArray = Arrays.copyOfRange(array, 0, midpoint);
-        int[] rightArray = Arrays.copyOfRange(array, midpoint, array.length);
+        // Split the array into two halves
+        ArrayList<Event> left = new ArrayList<>();
+        ArrayList<Event> right = new ArrayList<>();
 
-        mergeSort(leftArray);
-        mergeSort(rightArray);
+        int middle = list.size() / 2;
 
-        merge(array, leftArray, rightArray);
+        for (int i = 0; i < middle; i++) {
+            left.add(list.get(i));
+        }
+
+        for (int i = middle; i < list.size(); i++) {
+            right.add(list.get(i));
+        }
+
+        // Recursively sort the two halves
+        mergeSort(left);
+        mergeSort(right);
+
+        // Merge the sorted halves
+        merge(list, left, right);
     }
 
-    private static void merge(int[] result, int[] leftArray, int[] rightArray) {
-        int i = 0, j = 0, k = 0;
+    /**
+     * Merge method, to merge a left and right arraylist
+     * @param list general list
+     * @param left left list
+     * @param right right list
+     */
+    private static void merge(ArrayList<Event> list, ArrayList<Event> left, ArrayList<Event> right) {
+        int leftIndex = 0, rightIndex = 0, listIndex = 0;
 
-        while (i < leftArray.length && j < rightArray.length) {
-            if (leftArray[i] <= rightArray[j]) {
-                result[k++] = leftArray[i++];
+        while (leftIndex < left.size() && rightIndex < right.size()) {
+            if (left.get(leftIndex).date.compareTo(right.get(rightIndex).date) < 0) {
+                list.set(listIndex++, left.get(leftIndex++));
             } else {
-                result[k++] = rightArray[j++];
+                list.set(listIndex++, right.get(rightIndex++));
             }
         }
 
-        while (i < leftArray.length) {
-            result[k++] = leftArray[i++];
+        while (leftIndex < left.size()) {
+            list.set(listIndex++, left.get(leftIndex++));
         }
 
-        while (j < rightArray.length) {
-            result[k++] = rightArray[j++];
+        while (rightIndex < right.size()) {
+            list.set(listIndex++, right.get(rightIndex++));
         }
     }
 

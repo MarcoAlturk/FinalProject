@@ -3,6 +3,10 @@ package org.example;
 import java.time.LocalDate;
 import java.util.ArrayList;
 
+/**
+ * Event class
+ * Holds the name, description, num of participants, price per person, arrayList of guests, date of event and budget
+ */
 public class Event {
     String name;
     String description;
@@ -12,9 +16,22 @@ public class Event {
     LocalDate date;
     double budget;
 
+    /**
+     * No-args event constructor
+     */
     public Event() {
     }
 
+    /**
+     * All args event constructor
+     * @param name name of event
+     * @param description description of event
+     * @param maxNumOfParticipants maximum number of guests
+     * @param pricePerPerson price per guest
+     * @param guestList arrayList of guests
+     * @param date date of the event
+     * @param budget total budget for the event
+     */
     public Event(String name, String description, int maxNumOfParticipants, double pricePerPerson, ArrayList<Guest> guestList, LocalDate date, double budget) {
         this.name = name;
         this.description = description;
@@ -25,6 +42,10 @@ public class Event {
         this.budget = budget;
     }
 
+    /**
+     * ToString to display the event
+     * @return the name, description, numofparticipants, priceperson, guestlist, date, budget
+     */
     @Override
     public String toString() {
         return "Event{" +
@@ -38,6 +59,10 @@ public class Event {
                 '}';
     }
 
+    /**
+     * Display event details
+     * It is like a toString, but more detailed and more nicely formatted
+     */
     public void displayEventDetails() {
         System.out.println("Name : " + name);
         System.out.println("Description : " + description);
