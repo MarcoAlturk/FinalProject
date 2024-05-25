@@ -1,5 +1,7 @@
 package org.example;
 
+import java.util.Objects;
+
 /**
  * Guest class, holds firstName, lastName, age and Diet
  */
@@ -86,4 +88,19 @@ public class Guest {
                 ", diet=" + diet +
                 '}';
     }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Guest guest = (Guest) o;
+        return Objects.equals(firstName, guest.firstName) &&
+                Objects.equals(lastName, guest.lastName);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(firstName, lastName);
+    }
+
 }

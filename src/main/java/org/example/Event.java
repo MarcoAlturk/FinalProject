@@ -2,6 +2,7 @@ package org.example;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Objects;
 
 /**
  * Event class
@@ -76,6 +77,18 @@ public class Event {
         System.out.println("Date : " + date);
         System.out.println("Budget : " + budget + "$");
         System.out.println("--------------------------------------------");
+    }
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Event event = (Event) o;
+        return maxNumOfParticipants == event.maxNumOfParticipants && Double.compare(event.pricePerPerson, pricePerPerson) == 0 && Double.compare(event.budget, budget) == 0 && Objects.equals(name, event.name) && Objects.equals(description, event.description) && Objects.equals(date, event.date);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(name, description, maxNumOfParticipants, pricePerPerson, guestList, date, budget);
     }
 }

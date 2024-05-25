@@ -12,6 +12,7 @@ import org.checkerframework.checker.units.qual.C;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.telegram.telegrambots.bots.TelegramLongPollingBot;
+import org.telegram.telegrambots.meta.api.methods.GetUserProfilePhotos;
 import org.telegram.telegrambots.meta.api.methods.send.SendMessage;
 import org.telegram.telegrambots.meta.api.objects.Update;
 import org.telegram.telegrambots.meta.exceptions.TelegramApiException;
@@ -178,10 +179,39 @@ public class Main {
             }
 
         } while (!enteredRight);
-        scanner.nextLine();
+
+        LocalDate today = LocalDate.now();
+        scanner.nextLine(); // reset the buffer
+        enteredRight = false;
+        do {
+            try {
+                System.out.println("When is the event (dd/mm/yyyy) : ");
+                String input = scanner.nextLine();
+                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("d/M/yyyy");
+                date = LocalDate.parse(input, formatter);
+                if (DateValidater.isValidDate(date.getYear(), date.getMonthValue(), date.getDayOfMonth())) {
+
+                    if (date.isBefore(LocalDate.now())) {
+                        System.out.println("Please don't enter a date before now.");
+                    } else {
+                        date = LocalDate.parse(input, formatter);
+                        enteredRight = true;
+                    }
+                } else {
+                    throw new InvalidDateException("Please enter a valid date.");
+                }
+            } catch (InvalidDateException e) {
+                System.out.println(e.getMessage());
+            }
+            catch(Exception e) {
+                System.out.println(e.getMessage());
+            }
+        } while (!enteredRight);
+
+
         enteredRight = false;
         int numOfPeopleInFile = 0;
-        ArrayList<Guest> guestList = new ArrayList<Guest>();
+        ArrayList<Guest> guestList = new ArrayList<>();
         do {
             try {
                 System.out.println("Please enter the directory of the file containing the guests (the file should be formatted as FIRST NAME,LAST NAME,AGE,DIET(VEGAN, VEGETARIAN OR NODIET)) : ");
@@ -192,6 +222,7 @@ public class Main {
                     if (lines.size() > maxNumOfGuests) {
                         System.out.println("The file contains more guests than allowed.");
                     } else {
+                        guestList.clear();
                         for (String line : lines) {
                             String[] data = line.split(",");
                             if (data.length == 4) { // check if each line has 4 pieces of data
@@ -205,28 +236,44 @@ public class Main {
                                     throw new NegativeNumberException("Please make sure all of the ages in the file are valid.");
                                 }
 
+                                boolean guestBooked = false;
 
-                                switch (dietPreference.toLowerCase()) {
-                                    case "vegan":
-                                        Guest guest = new Guest(firstName, lastName, age, new VeganDiet());
-                                        guestList.add(guest);
-                                        enteredRight = true;
-                                        break;
-                                    case "nodiet":
-                                        Guest guest2 = new Guest(firstName, lastName, age, new GeneralDiet());
-                                        guestList.add(guest2);
-                                        enteredRight = true;
-                                        break;
-                                    case "vegetarian":
-                                        Guest guest3 = new Guest(firstName, lastName, age, new VegetarianDiet());
-                                        guestList.add(guest3);
-                                        enteredRight = true;
-                                        break;
-                                    default:
-                                        throw new InvalidDietException("Please make sure all diets are correctly formatted (VEGAN, VEGETARIAN OR NODIET)");
-
+                                for (Event eventLoop : eventManager.events) {
+                                    int comparisonResult = date.compareTo(eventLoop.date);
+                                    for (Guest guestLoop : eventLoop.guestList) {
+                                        if (guestLoop.firstName.equals(firstName) && guestLoop.lastName.equals(lastName) && comparisonResult == 0) {
+                                            System.out.println(guestLoop.firstName + " " + guestLoop.lastName + " already has an event scheduled for them on the same day!");
+                                            enteredRight = false;
+                                            guestBooked = true;
+                                        }
+                                    }
                                 }
-                                enteredRight = true;
+                                if (!guestBooked) {
+                                    if (guestList.contains(new Guest(firstName, lastName, age, new VeganDiet()))) {
+                                        enteredRight = false;
+                                        System.out.println(firstName + " " + lastName + " has been added twice!");
+                                    } else {
+                                        switch (dietPreference.toLowerCase()) {
+                                            case "vegan":
+                                                Guest guest = new Guest(firstName, lastName, age, new VeganDiet());
+                                                guestList.add(guest);
+                                                enteredRight = true;
+                                                break;
+                                            case "nodiet":
+                                                Guest guest2 = new Guest(firstName, lastName, age, new GeneralDiet());
+                                                guestList.add(guest2);
+                                                enteredRight = true;
+                                                break;
+                                            case "vegetarian":
+                                                Guest guest3 = new Guest(firstName, lastName, age, new VegetarianDiet());
+                                                guestList.add(guest3);
+                                                enteredRight = true;
+                                                break;
+                                            default:
+                                                throw new InvalidDietException("Please make sure all diets are correctly formatted (VEGAN, VEGETARIAN OR NODIET)");
+                                        }
+                                    }
+                                }
                             } else {
                                 enteredRight = false;
                                 throw new InvalidFileStructureException("There was an error reading the file contents. Please make sure the file is correctly formatted.");
@@ -253,33 +300,7 @@ public class Main {
             }
         } while (!enteredRight);
 
-        LocalDate today = LocalDate.now();
 
-        enteredRight = false;
-        do {
-            try {
-                System.out.println("When is the event (dd/mm/yyyy) : ");
-                String input = scanner.nextLine();
-                DateTimeFormatter formatter = DateTimeFormatter.ofPattern("d/M/yyyy");
-                date = LocalDate.parse(input, formatter);
-                if (DateValidater.isValidDate(date.getYear(), date.getMonthValue(), date.getDayOfMonth())) {
-
-                    if (date.isBefore(LocalDate.now())) {
-                        System.out.println("Please don't enter a date before now.");
-                    } else {
-                        date = LocalDate.parse(input, formatter);
-                        enteredRight = true;
-                    }
-                } else {
-                    throw new InvalidDateException("Please enter a valid date.");
-                }
-            } catch (InvalidDateException e) {
-                System.out.println(e.getMessage());
-            }
-            catch(Exception e) {
-                System.out.println(e.getMessage());
-            }
-        } while (!enteredRight);
         int budget = 0;
         enteredRight = false;
         do {
@@ -459,6 +480,7 @@ public class Main {
                                     if (lines.size() > eventManager.events.get(chosenEvent-1).maxNumOfParticipants) {
                                         System.out.println("The file contains more guests than allowed.");
                                     } else {
+                                        guestList.clear();
                                         for (String line : lines) {
                                             String[] data = line.split(",");
                                             if (data.length == 4) { // check if each line has 4 pieces of data
@@ -471,29 +493,45 @@ public class Main {
                                                     enteredRight = false;
                                                     throw new NegativeNumberException("Please make sure all of the ages in the file are valid.");
                                                 }
+                                                boolean guestBooked = false;
 
-
-                                                switch (dietPreference.toLowerCase()) {
-                                                    case "vegan":
-                                                        Guest guest = new Guest(firstName, lastName, age, new VeganDiet());
-                                                        guestList.add(guest);
-                                                        enteredRight = true;
-                                                        break;
-                                                    case "nodiet":
-                                                        Guest guest2 = new Guest(firstName, lastName, age, new GeneralDiet());
-                                                        guestList.add(guest2);
-                                                        enteredRight = true;
-                                                        break;
-                                                    case "vegetarian":
-                                                        Guest guest3 = new Guest(firstName, lastName, age, new VegetarianDiet());
-                                                        guestList.add(guest3);
-                                                        enteredRight = true;
-                                                        break;
-                                                    default:
-                                                        throw new InvalidDietException("Please make sure all diets are correctly formatted (VEGAN, VEGETARIAN OR NODIET)");
-
+                                                for (int i = 0; i < eventManager.events.size(); i++) {
+                                                    int comparisonResult = eventManager.events.get(chosenEvent-1).date.compareTo(eventManager.events.get(i).date);
+                                                    for (Guest guestLoop : eventManager.events.get(i).guestList) {
+                                                        if (guestLoop.firstName.equals(firstName) && guestLoop.lastName.equals(lastName) && comparisonResult == 0 && i != chosenEvent-1) {
+                                                            System.out.println(guestLoop.firstName + " " + guestLoop.lastName + " already has an event scheduled for them on the same day!");
+                                                            enteredRight = false;
+                                                            guestBooked = true;
+                                                        }
+                                                    }
                                                 }
-                                                enteredRight = true;
+                                                if (!guestBooked) {
+                                                    if (guestList.contains(new Guest(firstName, lastName, age, new VeganDiet()))) {
+                                                        enteredRight = false;
+                                                        System.out.println(firstName + " " + lastName + " has been added twice!");
+                                                    } else {
+                                                        switch (dietPreference.toLowerCase()) {
+                                                            case "vegan":
+                                                                Guest guest = new Guest(firstName, lastName, age, new VeganDiet());
+                                                                guestList.add(guest);
+                                                                enteredRight = true;
+                                                                break;
+                                                            case "nodiet":
+                                                                Guest guest2 = new Guest(firstName, lastName, age, new GeneralDiet());
+                                                                guestList.add(guest2);
+                                                                enteredRight = true;
+                                                                break;
+                                                            case "vegetarian":
+                                                                Guest guest3 = new Guest(firstName, lastName, age, new VegetarianDiet());
+                                                                guestList.add(guest3);
+                                                                enteredRight = true;
+                                                                break;
+                                                            default:
+                                                                throw new InvalidDietException("Please make sure all diets are correctly formatted (VEGAN, VEGETARIAN OR NODIET)");
+
+                                                        }
+                                                    }
+                                                }
                                             } else {
                                                 enteredRight = false;
                                                 throw new InvalidFileStructureException("There was an error reading the file contents. Please make sure the file is correctly formatted.");
@@ -538,10 +576,33 @@ public class Main {
                                     if (date.isBefore(LocalDate.now())) {
                                         System.out.println("Please don't enter a date before now.");
                                     } else {
-                                        date = LocalDate.parse(input, formatter);
-                                        eventManager.events.get(chosenEvent-1).date = date;
-                                        enteredRight = true;
-                                        System.out.println("New date set successfully.");
+                                        boolean guestBooked = false;
+
+                                        Map<String, List<LocalDate>> guestSchedule = new HashMap<>();
+
+                                        for (Event event : eventManager.events) {
+                                            LocalDate eventDate = event.date;
+
+                                            for (Guest guest : event.guestList) {
+                                                String guestKey = guest.firstName + " " + guest.lastName;
+
+                                                List<LocalDate> scheduledDates = guestSchedule.getOrDefault(guestKey, new ArrayList<>());
+
+                                                if (scheduledDates.contains(eventDate)) {
+                                                    System.out.println(guest.firstName + " " + guest.lastName + " already has an event scheduled for them on that day!");
+                                                    guestBooked = true;
+                                                } else {
+                                                    scheduledDates.add(eventDate);
+                                                    guestSchedule.put(guestKey, scheduledDates);
+                                                }
+                                            }
+                                        }
+                                        if (!guestBooked) {
+                                            date = LocalDate.parse(input, formatter);
+                                            eventManager.events.get(chosenEvent-1).date = date;
+                                            enteredRight = true;
+                                            System.out.println("New date set successfully.");
+                                        }
                                     }
                                 } else {
                                     throw new InvalidDateException("Please enter a valid date.");
@@ -712,7 +773,7 @@ public class Main {
         Scanner scanner = new Scanner(System.in);
         boolean enteredRight = false;
         String sourcePath = "C:\\Users\\18180017\\Desktop\\CEGEP\\Sem2\\Programming\\FinalProject\\TicketTemplate.txt";
-        System.out.println("Which event would you like to publicize : ");
+        System.out.println("Which event would you like to make tickets for  : ");
         Event event = eventManager.events.get(0);
         do {
             int i = 0;
